@@ -34,11 +34,14 @@ For more details, visit the source at [link](https://medium.com/macoclock/how-to
 
 After the installation is complete, add the following code to your .zshrc file.
 ```
+source $(brew --prefix nvm)/nvm.sh
+export PATH=$PATH:$HOME/.composer/vendor/bin
+
 switchphp() {
     installed_php_versions=("7.4" "8.0" "8.1" "8.2" "8.3")
     current_php_version=$(php -v | grep -o 'PHP [0-9]*\.[0-9]*' | cut -d ' ' -f 2 | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
     target_php_version=$1
-    
+    echo "You can be run version php "$target_php_version
     if [ -z "$1" ]; then
         echo "No PHP version provided"
         return 1
@@ -53,11 +56,17 @@ switchphp() {
         echo "You are already on PHP version $1"
         return 1
     fi
-    
-    brew unlink php@"$current_php_version"
-    brew link php@"$target_php_version"
+    echo "======================================================================================================"
+    echo "Skip text on below line"
+    brew unlink php@"$current_php_version" && brew link --overwrite --force php@"$target_php_version"
+    echo "======================================================================================================"
+    echo "Please fill password for changed version php on valet"
+    valet use php@"$target_php_version" --force
+    echo "======================================================================================================"
     php -v
+    echo "======================================================================================================"
 }
+
 ```
 If you encounter any issues, refer to the information below, as the problems may be due to the recent installation.
 ```
