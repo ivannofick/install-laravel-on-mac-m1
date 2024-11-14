@@ -38,31 +38,46 @@ source $(brew --prefix nvm)/nvm.sh
 export PATH=$PATH:$HOME/.composer/vendor/bin
 
 switchphp() {
+    # List of available PHP versions
     installed_php_versions=("7.4" "8.0" "8.1" "8.2" "8.3")
+
+    # Get the current PHP version
     current_php_version=$(php -v | grep -o 'PHP [0-9]*\.[0-9]*' | cut -d ' ' -f 2 | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+
     target_php_version=$1
-    echo "You can be run version php "$target_php_version
+    echo "You can run PHP version $target_php_version"
+
+    # Check if no PHP version is provided
     if [ -z "$1" ]; then
         echo "No PHP version provided"
         return 1
     fi
     
-    if [[ ! ${installed_php_versions[(r)$target_php_version]} ]]; then
+    # Validate if the target PHP version is available in the list
+    if [[ ! " ${installed_php_versions[@]} " =~ " ${target_php_version} " ]]; then
         echo "Invalid PHP version provided"
         return 1
     fi
     
+    # Check if the current PHP version is the same as the target version
     if [[ $target_php_version == $current_php_version ]]; then
-        echo "You are already on PHP version $1"
+        echo "You are already using PHP version $1"
         return 1
     fi
+
     echo "======================================================================================================"
-    echo "Skip text on below line"
+    echo "Switching from PHP $current_php_version to PHP $target_php_version"
+    echo "======================================================================================================"
+
+    # Unlink the current PHP version and link to the target version
     brew unlink php@"$current_php_version" && brew link --overwrite --force php@"$target_php_version"
+    
+    # Use the newly installed PHP version with Laravel Valet
+    echo "Please enter the password for the changed PHP version on Valet"
+    valet use php@"$target_php_version"
+
     echo "======================================================================================================"
-    echo "Please fill password for changed version php on valet"
-    valet use php@"$target_php_version" --force
-    echo "======================================================================================================"
+    # Verify the currently active PHP version
     php -v
     echo "======================================================================================================"
 }
